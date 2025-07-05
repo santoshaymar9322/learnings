@@ -1,0 +1,8 @@
+# exclude all the nested node modules
+**/node_modules/
+
+# exclude all the nested envs
+**/.env
+**/.env.
+
+
