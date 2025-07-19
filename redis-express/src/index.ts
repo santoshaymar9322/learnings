@@ -22,6 +22,8 @@ app.use(express.json());
 
   app.use(async (req,res,next) => {
     const visits = await redisClient.incr('keys')
+   
+    console.log("expires in",await redisClient.ttl('course'))
 
   console.log("hey the server was hit",visits)
   next()
@@ -29,23 +31,28 @@ app.use(express.json());
 
 
 
-  app.post("/set", async(req,res) => {
+  app.post("/", async(req,res) => {
     await redisClient.set("course",req.body.course)
+    await redisClient.expire("course",10)
     return res.status(200).send("sucessful")
   })
-  app.get("/get", async(req, res) => {
+  app.get("/", async(req, res) => {
     // console.log("req",req)
     const course = await redisClient.get('course')
+    
     if(course){
+      await redisClient.expire("course",100,"GT")
       return res.send(`name is ${course}`)
     }
     else{
       await redisClient.set("course",req.body.course)
+      
+      return res.status(400).send('sorry we dont found your course but we just stroing that in redis okay get out of here')
     }
-    return res.send('sorry we dont found your course but we just stroing that in redis okay get out of here')
+    
 });
 
-  app.delete("/del",async(req,res) => {
+  app.delete("/",async(req,res) => {
     await redisClient.del(["course"])
     return res.send("hey mate deleted it ")
 
