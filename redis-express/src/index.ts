@@ -1,3 +1,4 @@
+import e from "express";
 import express from "express";
 import { createClient } from "redis";
 const app = express();
@@ -38,11 +39,14 @@ app.use(express.json());
   })
   app.get("/", async(req, res) => {
     // console.log("req",req)
-    const course = await redisClient.get('course')
+    // console.log(await redisClient.keys('*'))
+    // console.log("mget",await redisClient.mGet(["bike1","bike2"]))
+    const newCourse = req.body.course
+    const course = await redisClient.APPEND('course',newCourse)
     
     if(course){
-      await redisClient.expire("course",100,"GT")
-      return res.send(`name is ${course}`)
+      
+      return res.send(`name is ${await redisClient.get("course")}`)
     }
     else{
       await redisClient.set("course",req.body.course)
